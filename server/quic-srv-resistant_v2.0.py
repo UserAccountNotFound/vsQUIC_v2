@@ -14,7 +14,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
-        logging.FileHandler('/opt/quic_server.log'),
+        logging.FileHandler('./quic_server.log'),
         logging.StreamHandler()
     ]
 )
@@ -282,8 +282,8 @@ async def run_server():
     )
 
     # Проверка сертификатов
-    cert_path = Path("/opt/ENV/cert-srv.pem")
-    key_path = Path("/opt/ENV/key-srv.pem")
+    cert_path = Path("./ENV/cert-srv.pem")
+    key_path = Path("./ENV/key-srv.pem")
 
     if not cert_path.exists() or not key_path.exists():
         logging.critical("\n!!! ОШИБКА: Сертификаты не найдены !!!")
