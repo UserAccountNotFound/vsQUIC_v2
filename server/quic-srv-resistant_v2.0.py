@@ -20,6 +20,36 @@ logging.basicConfig(
 )
 
 class SecureQuicServerProtocol(QuicConnectionProtocol):
+    # Константы безопасности (уровень класса)
+    MAX_HEADER_NAME_LENGTH = 128
+    MAX_HEADER_VALUE_LENGTH = 4096
+    MAX_TOTAL_HEADERS_SIZE = 16384
+    MAX_REQUEST_SIZE = 1024 * 1024  # 1MB
+    MAX_DATAGRAM_SIZE = 1350
+    CONNECTION_IDLE_TIMEOUT = 30  # секунды
+    
+    # Минимальная поддерживаемая версия QUIC
+    MIN_SUPPORTED_QUIC_VERSION = 0x00000001
+    
+    # Белый список разрешённых заголовков
+    ALLOWED_HEADERS = {
+        b'host', b'user-agent', b'accept', b'accept-language',
+        b'accept-encoding', b'content-type', b'content-length',
+        b'referer', b'connection', b'cache-control',
+        b'upgrade-insecure-requests', b'method', b'path',
+        b'authority', b'scheme', b'cookie', b'status',
+        b'authorization', b'date', b'server', b'set-cookie',
+        b'location', b'alt-svc', b'early-data', b'priority',
+    }
+    
+    # Обязательные заголовки
+    REQUIRED_HEADERS = {
+        b':method': lambda v: v.strip() != b'',
+        b':path': lambda v: v.strip() != b'',
+        b':scheme': lambda v: v.strip() != b'',
+        b':authority': lambda v: v.strip() != b'',
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._http = None
@@ -27,36 +57,7 @@ class SecureQuicServerProtocol(QuicConnectionProtocol):
         self._connection_start = datetime.now()
         self._client_address = None
         self._connection_checked = False
-
-        # Ограничения безопасности
-        self.MAX_HEADER_NAME_LENGTH = 128
-        self.MAX_HEADER_VALUE_LENGTH = 4096
-        self.MAX_TOTAL_HEADERS_SIZE = 16384
-        self.MAX_REQUEST_SIZE = 1024 * 1024  # 1MB
-        self.MAX_DATAGRAM_SIZE = 1350
-        self.CONNECTION_IDLE_TIMEOUT = 30  # секунды
-
-        # Минимальная поддерживаемая версия QUIC
-        self.MIN_SUPPORTED_QUIC_VERSION = 0x00000001
-
-        # Белый список разрешённых заголовков
-        self.ALLOWED_HEADERS = {
-            b'host', b'user-agent', b'accept', b'accept-language',
-            b'accept-encoding', b'content-type', b'content-length',
-            b'referer', b'connection', b'cache-control',
-            b'upgrade-insecure-requests', b'method', b'path',
-            b'authority', b'scheme', b'cookie', b'status',
-            b'authorization', b'date', b'server', b'set-cookie',
-            b'location', b'alt-svc', b'early-data', b'priority',
-        }
-
-        # Обязательные заголовки
-        self.REQUIRED_HEADERS = {
-            b':method': lambda v: v.strip() != b'',
-            b':path': lambda v: v.strip() != b'',
-            b':scheme': lambda v: v.strip() != b'',
-            b':authority': lambda v: v.strip() != b'',
-        }
+        logging.info("Новое подключение инициализировано")
 
     def quic_event_received(self, event):
         try:
@@ -277,8 +278,8 @@ async def run_server():
     configuration = QuicConfiguration(
         is_client=False,
         alpn_protocols=H3_ALPN,
-        max_datagram_size=1350,
-        idle_timeout=30,
+        max_datagram_size=SecureQuicServerProtocol.MAX_DATAGRAM_SIZE,
+        idle_timeout=SecureQuicServerProtocol.CONNECTION_IDLE_TIMEOUT,
     )
 
     # Проверка сертификатов
