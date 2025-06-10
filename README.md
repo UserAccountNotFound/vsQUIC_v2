@@ -32,6 +32,6 @@ pip install -r ./requirements.txt
 ```
 запускаем .....
 ```bash
-python ./server.py
+python ./quic-srv-.....py
 ```
 
