@@ -1,14 +1,18 @@
 # vsQUIC
 
+клонируем репозиторий
 ``` bash
 git clone https://github.com/UserAccountNotFound/vsQUIC_v2.git /opt/vsQUIC
 ```
+обновляем пакетную базу дистрибутива и сразу обновсляем операционную систему
 ```bash
 apt update && apt upgrade -y
 ```
+устанавливаем Python и его пакетный менеджер
 ```bash
 apt install python3 python-pip
 ```
+переходим в целевую папку
 ``` bash
 cd /opt/vsQUIC
 ```
